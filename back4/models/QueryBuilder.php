@@ -141,8 +141,10 @@ class QueryBuilder
             $fields .= $key."=:".$key.",";
         }
         $fields = rtrim($fields, ',');
-        $sql = "UPDATE $table SET $fields WHERE id=$id";
+        $sql = "UPDATE $table SET $fields WHERE id=:id";
         $statement = $this->pdo->prepare($sql);
+        // Bind the ID parameter as well
+        $updatingInformation['id'] = $id;
         $result = $statement->execute($updatingInformation);
         if ($result === false) {
             throw new NotFoundByIdException();

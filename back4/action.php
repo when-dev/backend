@@ -3,8 +3,6 @@
 use Models\DataValidator;
 use Models\QueryBuilder;
 
-header('Content-Type: text/html; charset=UTF-8');
-
 require_once 'models/QueryBuilder.php';
 require_once 'models/DataValidator.php';
 
@@ -13,32 +11,42 @@ session_start();
 $dataValidator = new DataValidator();
 $queryBuilder = new QueryBuilder();
 
-$_SESSION['errors'] = $dataValidator->validateAll($_POST);
+// Validate form data
+$errors = $dataValidator->validateAll($_POST);
 
-if(! empty($_SESSION['errors'])) {
+// If there are validation errors, save them to the session and redirect back to the form
+if (!empty($errors)) {
+    $_SESSION['errors'] = $errors;
+    $_SESSION['form_data'] = $_POST; // Save form data to repopulate the form
     header('Location: index.php');
     exit;
 }
 
-$queryBuilder->storeOne('Applications', [
+// Prepare data for insertion, ensuring all fields are set
+$insertData = [
     'fio' => $_POST['FIO'],
     'telephone' => $_POST['telephone'],
     'email' => $_POST['email'],
     'birthday' => $_POST['birthday'],
-    'sex' => $_POST['sex'],
+    'sex' => $_POST['sex'] ?? 'Not specified', // Provide a default value if not set
     'biography' => $_POST['biography'],
-]);
+];
+
+// Insert data into the database
+$queryBuilder->storeOne('Applications', $insertData);
 $user_id = $queryBuilder->getLastId();
 
-foreach ($_POST['languages'] as $language) {
-    $queryBuilder->storeOne('LanguageApplications', [
-        'application_id' => $user_id,
-        'language_id' => $language
-    ]);
+// Handle languages if provided
+if (!empty($_POST['languages'])) {
+    foreach ($_POST['languages'] as $language) {
+        $queryBuilder->storeOne('LanguageApplications', [
+            'application_id' => $user_id,
+            'language_id' => $language
+        ]);
+    }
 }
 
-// Сохраняем данные формы в Cookies
-setcookie("form_data", json_encode($_POST), time() + (365 * 24 * 60 * 60), "/");
-
+// Set a success flag and redirect back to the form
+$_SESSION['form_submitted'] = true;
 header('Location: index.php');
 exit;
