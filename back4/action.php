@@ -15,7 +15,7 @@ $queryBuilder = new QueryBuilder();
 
 $_SESSION['errors'] = $dataValidator->validateAll($_POST);
 
-if(!empty($_SESSION['errors'])) {
+if(! empty($_SESSION['errors'])) {
     header('Location: index.php');
     exit;
 }
@@ -36,9 +36,6 @@ foreach ($_POST['languages'] as $language) {
         'language_id' => $language
     ]);
 }
-
-// Сохраняем данные формы в Cookies
-setcookie("form_data", json_encode($_POST), time() + (365 * 24 * 60 * 60), "/");
 
 header('Location: index.php');
 exit;
