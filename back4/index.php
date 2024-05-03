@@ -30,12 +30,12 @@ session_start();
             }
             echo '</ul>';
             echo '</div>';
-        } else if((isset($_SESSION['errors']))) {
-            echo '<div class="alert alert-primary" id="form-success" role="alert">
-                      Форма отправлена успешно, в ближайшее время мы свяжемся с вами
-                    </div>';
+        } else if(isset($_COOKIE["form_data"])) {
+            $form_data = json_decode($_COOKIE["form_data"], true);
+            foreach ($form_data as $field => $value) {
+                echo '<input type="text" name="'.$field.'" value="'.$value.'">';
+            }
         }
-        unset($_SESSION['errors']);
         ?>
 
         <p><label for="FIO"><input name="FIO" type="text" id="FIO" placeholder="ФИО"></label></p>

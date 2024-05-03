@@ -37,5 +37,8 @@ foreach ($_POST['languages'] as $language) {
     ]);
 }
 
+// Сохраняем данные формы в Cookies
+setcookie("form_data", json_encode($_POST), time() + (365 * 24 * 60 * 60), "/");
+
 header('Location: index.php');
 exit;
