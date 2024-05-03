@@ -33,6 +33,9 @@ session_start();
         } else if(isset($_COOKIE["form_data"])) {
             $form_data = json_decode($_COOKIE["form_data"], true);
             foreach ($form_data as $field => $value) {
+                if (is_array($value)) {
+                    $value = implode(', ', $value); // Преобразование массива в строку
+                }
                 echo '<input type="text" name="'.$field.'" value="'.$value.'">';
             }
         }
