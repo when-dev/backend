@@ -1,130 +1,228 @@
 <?php
-session_start();
+/**
+ * Реализовать проверку заполнения обязательных полей формы в предыдущей
+ * с использованием Cookies, а также заполнение формы по умолчанию ранее
+ * введенными значениями.
+ */
 
-$formSubmitted = $_SESSION['form_submitted'] ?? false;
-unset($_SESSION['form_submitted']); 
+// Отправляем браузеру правильную кодировку,
+// файл index.php должен быть в кодировке UTF-8 без BOM.
+header('Content-Type: text/html; charset=UTF-8');
 
-$errors = $_SESSION['errors'] ?? [];
-unset($_SESSION['errors']);
+// В суперглобальном массиве $_SERVER PHP сохраняет некторые заголовки запроса HTTP
+// и другие сведения о клиненте и сервере, например метод текущего запроса $_SERVER['REQUEST_METHOD'].
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+  // Массив для временного хранения сообщений пользователю.
+  $messages = array();
 
-$form_data = $_SESSION['form_data'] ?? [];
-unset($_SESSION['form_data']);
-?>
+  // В суперглобальном массиве $_COOKIE PHP хранит все имена и значения куки текущего запроса.
+  // Выдаем сообщение об успешном сохранении.
+  if (!empty($_COOKIE['save'])) {
+    // Удаляем куку, указывая время устаревания в прошлом.
+    setcookie('save', '', 100000);
+    // Если есть параметр save, то выводим сообщение пользователю.
+    $messages[] = 'Спасибо, результаты сохранены.';
+  }
+// Складываем признак ошибок в массив.
+$errors = array();
+$errors['fio'] = !empty($_COOKIE['fio_error']);
+$errors['email'] = !empty($_COOKIE['email_error']);
+$errors['year'] = !empty($_COOKIE['year_error']);
+$errors['gender'] = !empty($_COOKIE['gender_error']);
+$errors['field-multiple-language'] = !empty($_COOKIE['langs_error']);
+$errors['biography'] = !empty($_COOKIE['biography_error']);
+$errors['checkcontract'] = !empty($_COOKIE['checkcontract_error']);
 
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Форма</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link href="style.css" rel="stylesheet">
-</head>
-<body>
+// Выдаем сообщения об ошибках.
+if ($errors['fio']) {
+  // Удаляем куки, указывая время устаревания в прошлом.
+  setcookie('fio_error', '', 100000);
+  setcookie('fio_value', '', 100000);
+  // Выводим сообщение.
+  $messages[] = '<div class="error">Заполните имя.</div>';
+}
+if ($errors['email']) {
+  setcookie('email_error', '', 100000);
+  setcookie('email_value', '', 100000);
+  $messages[] = '<div class="error">Заполните email.</div>';
+}
+if ($errors['year']) {
+  setcookie('year_error', '', 100000);
+  setcookie('year_value', '', 100000);
+  $messages[] = '<div class="error">Заполните год.</div>';
+}
+if ($errors['gender']) {
+  setcookie('gender_error', '', 100000);
+  setcookie('gender_value', '', 100000);
+  $messages[] = '<div class="error">Выберете один из вариантов.</div>';
+}
+if ($errors['field-multiple-language']) {
+  setcookie('langs_error', '', 100000);
+  setcookie('langs_value', '', 100000);
+  $messages[] = '<div class="error">Выберете хотя бы один язык.</div>';
+}
+if ($errors['biography']) {
+  setcookie('biography_error', '', 100000);
+  setcookie('biography_value', '', 100000);
+  $messages[] = '<div class="error">Заполните биографию.</div>';
+}
+if ($errors['checkcontract']) {
+  setcookie('checkcontract_error', '', 100000);
+  setcookie('checkcontract_value', '', 100000);
+  $messages[] = '<div class="error">Согласие обязательно.</div>';
+}
 
-<div class="myform">
-    <form action="action.php" method="POST">
-        <h2 id="form">Форма</h2>
+// Складываем предыдущие значения полей в массив, если есть.
+$values = array();
+$values['fio'] = empty($_COOKIE['fio_value']) ? '' : $_COOKIE['fio_value'];
+$values['email'] = empty($_COOKIE['email_value']) ? '' : $_COOKIE['email_value'];
+$values['year'] = empty($_COOKIE['year_value']) ? '' : $_COOKIE['year_value'];
+$values['gender'] = empty($_COOKIE['gender_value']) ? '' : $_COOKIE['gender_value'];
+$values['field-multiple-language'] = empty($_COOKIE['langs_value']) ? '' : $_COOKIE['langs_value'];
+$values['biography'] = empty($_COOKIE['biography_value']) ? '' : $_COOKIE['biography_value'];
+$values['checkcontract'] = empty($_COOKIE['checkcontract_value']) ? '' : $_COOKIE['checkcontract_value'];
 
-        <?php if ($formSubmitted): ?>
-            <div class="alert alert-success" role="alert">
-                Форма успешно отправлена!
-            </div>
-        <?php endif; ?>
 
-        <?php if (!empty($errors)): ?>
-        <div id="errors" class="alert alert-danger">
-            <ul>
-                <?php foreach ($errors as $error): ?>
-                <li><?= htmlspecialchars($error) ?></li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
-        <?php endif; ?>
+// Включаем содержимое файла form.php.
+// В нем будут доступны переменные $messages, $errors и $values для вывода 
+// сообщений, полей с ранее заполненными данными и признаками ошибок.
+include('form.php');
+}
 
-        <p>
-            <label for="FIO">ФИО:</label>
-            <input name="FIO" type="text" id="FIO" placeholder="ФИО" value="<?= htmlspecialchars($form_data['FIO'] ?? '') ?>" class="<?= isset($errors['FIO']) ? 'is-invalid' : '' ?>">
-            <?php if (isset($errors['FIO'])): ?>
-            <div class="invalid-feedback"><?= htmlspecialchars($errors['FIO']) ?></div>
-            <?php endif; ?>
-        </p>
+else
+{
+  // Проверяем ошибки
+  $errors = FALSE;
+  //Получаем значения
+  $fioval = $_POST['fio'];
+  $emailval = $_POST['email'];
+  $yearval = $_POST['year'];
+  $genderval = $_POST['gender'];
+  $checkval = !empty($_POST['checkcontract']);
+  $bioval = $_POST['biography'];
+  $langsval = !empty($_POST['field-multiple-language'])?$_POST['field-multiple-language']:null;
+  
+  $langsCV = '';
+  if($langsval != null && !empty($langsval))
+  {
+    for($i = 0; $i < count($langsval); $i++)
+    {
+      $langsCV .= $langsval[$i] . ",";
+    }
+  }
+  // Проверка ФИО
+  if (!preg_match("/^[a-zA-Zа-яА-Я\s]+$/u", $fioval) || empty($fioval)) {
+    setcookie('fio_error', '1', time() + 24 * 60 * 60);
+    $errors = TRUE;
+  }
+  setcookie('fio_value', $fioval, time() + 30 * 24 * 60 * 60);
+  // Проверка года
+  if (empty($yearval) || !is_numeric($yearval) || !preg_match('/^\d+$/', $yearval)){
+    setcookie('year_error', '1', time() + 24 * 60 * 60);
+    $errors = TRUE;
+  }
+  setcookie('year_value', $yearval, time() + 30 * 24 * 60 * 60);
+  // Проверка email
+  if (empty($emailval) || !filter_var($emailval, FILTER_VALIDATE_EMAIL)){
+    setcookie('email_error', '1', time() + 24 * 60 * 60);
+    $errors = TRUE;
+  }
+  setcookie('email_value', $emailval, time() + 30 * 24 * 60 * 60);
+  // Проверка пола
+  if (empty($genderval) || ($genderval != 'male' && $genderval != 'female')) {
+    setcookie('gender_error', '1', time() + 24 * 60 * 60);
+    $errors = TRUE;
+  }
+  setcookie('gender_value', $genderval, time() + 30 * 24 * 60 * 60);
+  // Проверка выбора языка программирования
+  if (empty($langsval)) {
+    setcookie('langs_error', '1', time() + 24 * 60 * 60);
+    $errors = TRUE;
+  }
+  else
+  {
+    setcookie('langs_value', $langsCV, time() + 30 * 24 * 60 * 60);
+  }
+  // Проверка биографии
+  if (empty($bioval) || strlen($bioval) > 150) {
+    setcookie('biography_error', '1', time() + 24 * 60 * 60);
+    $errors = TRUE;
+  }
+  setcookie('biography_value', $bioval, time() + 30 * 24 * 60 * 60);
+  // Проверка согласия с контрактом
+  if (empty($checkval)) {
+    setcookie('checkcontract_error', '1', time() + 24 * 60 * 60);
+    $errors = TRUE;
+  }
+  setcookie('checkcontract_value', $checkval, time() + 30 * 24 * 60 * 60);
 
-        <p>
-            <label for="telephone">Телефон:</label>
-            <input name="telephone" type="tel" id="telephone" placeholder="номер телефона" value="<?= htmlspecialchars($form_data['telephone'] ?? '') ?>" class="<?= isset($errors['telephone']) ? 'is-invalid' : '' ?>">
-            <?php if (isset($errors['telephone'])): ?>
-            <div class="invalid-feedback"><?= htmlspecialchars($errors['telephone']) ?></div>
-            <?php endif; ?>
-        </p>
 
-        <p>
-            <label for="email">Email:</label>
-            <input name="email" type="email" id="email" placeholder="email" value="<?= htmlspecialchars($form_data['email'] ?? '') ?>" class="<?= isset($errors['email']) ? 'is-invalid' : '' ?>">
-            <?php if (isset($errors['email'])): ?>
-            <div class="invalid-feedback"><?= htmlspecialchars($errors['email']) ?></div>
-            <?php endif; ?>
-        </p>
+  if ($errors) {
+        // При наличии ошибок перезагружаем страницу и завершаем работу скрипта.
+    header('Location: index.php');
+    exit();
+  }
+  else
+  {
+    setcookie('fio_error', '', 100000);
+    setcookie('email_error', '', 100000);
+    setcookie('year_error', '', 100000);
+    setcookie('langs_error', '', 100000);
+    setcookie('gender_error', '', 100000);
+    setcookie('biography_error', '', 100000);
+    setcookie('checkcontract_error', '', 100000);
+  }
+  print('Валидация прошла успешно!');
+  // Сохранение в базу данных.
 
-        <p>
-            <label for="birthday">Дата рождения:</label>
-            <input name="birthday" type="date" id="birthday" value="<?= htmlspecialchars($form_data['birthday'] ?? '') ?>">
-        </p>
+  $db = new PDO("mysql:host=localhost; dbname=u67346", "u67346", "6918468",
+    [PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]); // Заменить test на имя БД, совпадает с логином uXXXXX
 
-        <p>Пол:</p>
-        <div class="m-3">
-            <label>
-                <input type="radio" name="sex" value="М" <?= isset($form_data['sex']) && $form_data['sex'] === 'М' ? 'checked' : '' ?>>
-                Мужчина
-            </label>
-            <label>
-                <input type="radio" name="sex" value="Ж" <?= isset($form_data['sex']) && $form_data['sex'] === 'Ж' ? 'checked' : '' ?>>
-                Женщина
-            </label>
-        </div>
+// Подготовленный запрос. Не именованные метки.
+try {
+  $stmt = $db->prepare("INSERT INTO Applicationss (fio, year, email, gender, biography, checkcontract) VALUES (?, ?, ?, ?, ?, ?)");
+  $checkContractValue = $_POST['checkcontract'] === 'on' ? 1 : 0;
+  $stmt->execute([$_POST['fio'], $_POST['year'], $_POST['email'], $_POST['gender'], $_POST['biography'], $checkContractValue]);
 
-        <p>Выберите язык программирования:</p>
-        <select name="languages[]" multiple>
-            <?php
-            $languages = [
-                '1' => 'Java',
-                '2' => 'C++',
-                '3' => 'Pascal',
-                '4' => 'C#',
-                '5' => 'PHP',
-                '6' => 'JavaScript',
-                '7' => 'Python',
-                '8' => 'Ruby',
-                '9' => 'Swift',
-                '10' => 'Go',
-                '11' => 'Kotlin',
-                '12' => 'Scala',
-                '13' => 'C',
-            ];
-            foreach ($languages as $value => $label): ?>
-            <option value="<?= $value ?>" <?= in_array($value, $form_data['languages'] ?? []) ? 'selected' : '' ?>><?= $label ?></option>
-            <?php endforeach; ?>
-        </select>
-        <label for="biography" class="form-label">Биография</label>
-            <textarea name="biography" id="biography" rows="4" class="form-control <?= isset($errors['biography']) ? 'is-invalid' : '' ?>" placeholder="Расскажите о себе"><?= htmlspecialchars($form_data['biography'] ?? '') ?></textarea>
-            <?php if (isset($errors['biography'])): ?>
-                <?php endif; ?>
+      // Получение ID последней вставленной записи
+      $lastInsertId = $db->lastInsertId();
 
-            <input name="checkbox" type="checkbox" id="checkbox" class="form-check-input <?= isset($errors['checkbox']) ? 'is-invalid' : '' ?>" <?= isset($form_data['checkbox']) && $form_data['checkbox'] === 'on' ? 'checked' : '' ?>>
-            <label for="checkbox">С контрактом ознакомлен(-а)</label>
-            <?php if (isset($errors['checkbox'])): ?>
-            <div class="invalid-feedback"><?= htmlspecialchars($errors['checkbox']) ?></div>
-            <?php endif; ?>
+      // Сохранение выбранных языков программирования в отдельной таблице
+      /* if (!empty($_POST['field-multiple-language'])) {
+        $languages = $_POST['field-multiple-language'];
+        foreach ($languages as $language) {
+          $stmt = $db->prepare("INSERT INTO programming_languages (user_id, language) VALUES (?, ?)");
+          $stmt->execute([$lastInsertId, $language]);
+        }
+      } */
+      if (!empty($_POST['field-multiple-language'])) {
+        $languages = $_POST['field-multiple-language'];
+        foreach ($languages as $language) {
+            $stmt = $db->prepare("SELECT id FROM programming_languagee WHERE name = ?");
+            $stmt->execute([$language]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+            if (!$row) {
+                $stmt = $db->prepare("INSERT INTO programming_languagee (name) VALUES (?)");
+                $stmt->execute([$language]);
+                $languageId = $db->lastInsertId();
+            } else {
+                $languageId = $row['id'];
+            }
+    
+            $stmt = $db->prepare("INSERT INTO application_language (application_id, language_id) VALUES (?, ?)");
+            $stmt->execute([$lastInsertId, $languageId]);
+        }
+    }
+    print('Данные успешно сохранены!');
+}
+catch(PDOException $e){
+  print('Error : ' . $e->getMessage());
+  exit();
+}
+// Сохраняем куку с признаком успешного сохранения.
+setcookie('save', '1');
 
-        <button type="submit" class="btn btn-success">Отправить форму на сервер</button>
-    </form>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
-</body>
-</html>
+// Делаем перенаправление.
+header('Location: index.php');
+}

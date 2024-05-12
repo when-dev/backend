@@ -1,49 +1,22 @@
--- mysql -u uXXXXX -p
--- password
+CREATE TABLE Applicationss (     
+    id INT AUTO_INCREMENT PRIMARY KEY,     
+    fio VARCHAR(255),     
+    year INT,     
+    email VARCHAR(255),   
+    gender ENUM('male', 'female'),  
+    biography TEXT,     
+    checkcontract TINYINT(1) );
 
-CREATE TABLE Languages
-(
-    id   int(128) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    title varchar(128)     not null default ''
-);
+-- Create the Languages table
+CREATE TABLE programming_language (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) UNIQUE);
+-- Create the FormLanguages table to establish a many-to-many relationship between Forms and Languages
+CREATE TABLE application_language (     
+    application_id INT,     
+    language_id INT,     
+    FOREIGN KEY (application_id) REFERENCES Applicationss(id),   
+    FOREIGN KEY (language_id) REFERENCES programming_language(id),     
+    PRIMARY KEY (application_id, language_id) );
 
-CREATE TABLE Applications
-(
-    id        int(128) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    fio       varchar(128)     not null default '',
-    telephone varchar(128)     not null default '',
-    email     varchar(128)     not null default '',
-    birthday  DATE,
-    sex       varchar(128)     not null default '',
-    biography varchar(128)     not null default ''
-);
-
-CREATE TABLE LanguageApplications
-(
-    id          int(128) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    application_id     int(128) unsigned NOT NULL,
-    language_id int(128) unsigned NOT NULL
-);
-
-INSERT INTO Languages(id, title)
-VALUES (1, 'JAVA');
-INSERT INTO Languages(id, title)
-VALUES (2, 'C++');
-INSERT INTO Languages(id, title)
-VALUES (3, 'Pascal');
-INSERT INTO Languages(id, title)
-VALUES (4, 'C#');
-INSERT INTO Languages(id, title)
-VALUES (5, 'JavaScript');
-INSERT INTO Languages(id, title)
-VALUES (6, 'PHP');
-INSERT INTO Languages(id, title)
-VALUES (7, 'Python');
-INSERT INTO Languages(id, title)
-VALUES (8, 'Haskel');
-INSERT INTO Languages(id, title)
-VALUES (9, 'Clojure');
-INSERT INTO Languages(id, title)
-VALUES (10, 'Prolog');
-INSERT INTO Languages(id, title)
-VALUES (11, 'Scala');
+ CREATE TABLE Users (     id INT AUTO_INCREMENT PRIMARY KEY,     FormId INT,     Login VARCHAR(255) NOT NULL,     Password VARCHAR(255) NOT NULL,     FOREIGN KEY (FormId) REFERENCES application(id) );

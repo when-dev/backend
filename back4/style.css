@@ -1,73 +1,40 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f8f9fa;
-    margin: 0;
-    padding: 0;
-}
-
-.myform {
-    max-width: 500px;
-    margin: 50px auto;
     padding: 20px;
+    background-color: #f0f0f0;
+  }
+  
+  form {
     background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-h2#form {
-    text-align: center;
-    color: #333;
-}
-
-#errors {
-    margin: 10px 0;
-}
-
-form {
-    display: flex;
-    flex-direction: column;
-}
-
-input, select, textarea {
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+  }
+  
+  input[type="text"], input[type="email"], select, textarea {
     width: 100%;
-    padding: 8px;
-    margin: 5px 0;
-    box-sizing: border-box;
+    padding: 12px;
     border: 1px solid #ccc;
     border-radius: 4px;
-}
-
-input[type="radio"], input[type="checkbox"] {
-    margin-right: 5px;
-}
-
-.btn {
-    margin-top: 10px;
-}
-
-.btn-success {
-    background-color: #28a745;
-    color: #fff;
+    box-sizing: border-box;
+    margin-top: 6px;
+    margin-bottom: 16px;
+    resize: vertical;
+  }
+  
+  input[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 20px;
     border: none;
-    padding: 10px 20px;
     border-radius: 4px;
-}
-
-.alert {
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 1px solid transparent;
-    border-radius: 4px;
-}
-
-.alert-danger {
-    background-color: #f8d7da;
-    color: #721c24;
-    border-color: #f5c6cb;
-}
-
-.alert-primary {
-    background-color: #cce5ff;
-    color: #004085;
-    border-color: #b8daff;
-}
+    cursor: pointer;
+  }
+  
+  input[type="submit"]:hover {
+    background-color: #45a049;
+  }
+  .error{
+    color: maroon;
+    border: 4px solid maroon;
+  }
